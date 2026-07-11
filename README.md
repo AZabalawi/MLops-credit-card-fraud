@@ -14,9 +14,9 @@ plain accuracy.
 
 | Name | Role |
 |---|---|
-| Abdul Raouf Zabalawi | Student |
-| Mohamed Roble | Student |
-| Somayeh Balashi | Student |
+| Abdul Raouf Zabalawi | DVC pipeline development, model training, and MLflow experiment tracking |
+| Mohamed Roble | Dataset selection, data preparation, and data quality documentation |
+| Somayeh Balashi | System architecture diagram, evaluation, results analysis, and documentation |
 
 ---
 
