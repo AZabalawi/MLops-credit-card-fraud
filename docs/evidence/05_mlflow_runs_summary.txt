@@ -1,0 +1,11 @@
+MLflow Experiment: creditcard-fraud-detection (experiment_id=1)
+Total logged runs: 6
+
+RUN NAME                         STAGE     STATUS    KEY METRICS
+----------------------------------------------------------------
+rf_n100_d12_cw-balanced          train     FINISHED  train_roc_auc=1.0, train_pr_auc=0.979
+rf_n100_d12_cw-balanced_eval     evaluate  FINISHED  precision=0.8846, recall=0.7263, f1=0.7977, pr_auc=0.7853
+rf_n150_d16_cw-balanced          train     FINISHED  train_roc_auc=1.0, train_pr_auc=0.9973
+rf_n150_d16_cw-balanced_eval     evaluate  FINISHED  precision=0.9324, recall=0.7263, f1=0.8166, pr_auc=0.8062
+rf_n100_d12_cw-None              train     FINISHED  train_roc_auc=1.0, train_pr_auc=0.9822
+rf_n100_d12_cw-None_eval         evaluate  FINISHED  precision=0.9857, recall=0.7263, f1=0.8364, pr_auc=0.7875

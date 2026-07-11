@@ -1,0 +1,31 @@
+# ============================================================
+# params.yaml
+# Central configuration file for the DVC pipeline.
+# Every stage reads its settings from here so the whole
+# pipeline is reproducible and versionable. Changing a value
+# here and running `dvc repro` (or `dvc exp run`) automatically
+# re-runs only the affected stages.
+# ============================================================
+
+data:
+  raw_path: data/raw/creditcard.csv    # Path to the raw dataset
+  test_size: 0.2                        # Fraction of data held out for testing
+  random_state: 42                      # Seed for reproducible train/test split
+  drop_duplicates: true                 # Remove duplicate transactions (data cleaning)
+
+model:
+  n_estimators: 100          # Number of trees in the Random Forest
+  max_depth: 12              # Max depth of each tree (controls overfitting)
+  min_samples_split: 2        # Min samples required to split an internal node
+  # class_weight handles the severe class imbalance (~0.17% fraud).
+  # "balanced" makes the model weight the rare fraud class more heavily.
+  class_weight: "balanced"
+  random_state: 42            # Seed for reproducible model training
+  n_jobs: -1                  # Use all CPU cores to speed up training
+
+mlflow:
+  experiment_name: creditcard-fraud-detection
+  # MLflow 3.x deprecated the plain filesystem store ("file:./mlruns").
+  # A local SQLite database keeps everything self-contained (no server
+  # needed) while staying compatible with current/future MLflow versions.
+  tracking_uri: sqlite:///mlflow.db

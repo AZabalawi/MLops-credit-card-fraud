@@ -1,0 +1,31 @@
+$ dvc repro   (full baseline pipeline run)
+Running stage 'prepare':
+> python src/prepare.py
+[INFO] Loading raw dataset from data/raw/creditcard.csv ...
+[INFO] Loaded dataset with shape (284807, 31)
+[INFO] Running data quality assessment ...
+[INFO] Data quality summary: 284807 rows, 30 features, 0 missing values,
+       1081 duplicate rows, fraud rate = 0.1727%.
+[INFO] Saved data quality report to metrics/data_quality_report.json
+[INFO] Dropped 1081 duplicate rows (284807 -> 283726).
+[INFO] Split complete -> train: 226980 rows (378 frauds),
+       test: 56746 rows (95 frauds) (test_size=0.2, random_state=42)
+[INFO] PREPARE stage completed successfully.
+
+Running stage 'train':
+> python src/train.py
+[INFO] Training RandomForest pipeline: n_estimators=100, max_depth=12,
+       class_weight=balanced
+[INFO] Training-set metrics: {'train_roc_auc': 1.0, 'train_pr_auc': 0.979}
+[INFO] MLflow run logged, run_name=rf_n100_d12_cw-balanced
+[INFO] Saved trained pipeline to models/model.pkl
+[INFO] TRAIN stage completed successfully.
+
+Running stage 'evaluate':
+> python src/evaluate.py
+[INFO] Evaluation metrics: {'accuracy': 0.999383, 'precision': 0.8846,
+       'recall': 0.7263, 'f1_score': 0.7977, 'roc_auc': 0.9567,
+       'pr_auc': 0.7853}
+[INFO] Saved confusion matrix plot to reports/confusion_matrix.png
+[INFO] MLflow eval run logged, run_name=rf_n100_d12_cw-balanced_eval
+[INFO] EVALUATE stage completed successfully.

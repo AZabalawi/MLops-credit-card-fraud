@@ -1,0 +1,24 @@
+{
+  "n_rows": 284807,
+  "n_columns": 31,
+  "n_features": 30,
+  "missing_values_total": 0,
+  "duplicate_rows": 1081,
+  "class_distribution": {
+    "0": 284315,
+    "1": 492
+  },
+  "fraud_count": 492,
+  "legitimate_count": 284315,
+  "fraud_rate_percent": 0.1727,
+  "amount_summary": {
+    "mean": 88.3496,
+    "std": 250.1201,
+    "min": 0.0,
+    "max": 25691.16
+  },
+  "time_summary": {
+    "min": 0.0,
+    "max": 172792.0
+  }
+}

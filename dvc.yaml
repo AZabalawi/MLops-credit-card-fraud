@@ -1,0 +1,55 @@
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    wdir: .
+    deps:
+      - src/prepare.py
+      - src/utils.py
+      - data/raw/creditcard.csv
+    params:
+      - data.raw_path
+      - data.test_size
+      - data.random_state
+      - data.drop_duplicates
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - metrics/data_quality_report.json:
+          cache: false
+
+  train:
+    cmd: python src/train.py
+    wdir: .
+    deps:
+      - src/train.py
+      - src/utils.py
+      - data/processed/train.csv
+    params:
+      - model.n_estimators
+      - model.max_depth
+      - model.min_samples_split
+      - model.class_weight
+      - model.random_state
+      - model.n_jobs
+      - mlflow.experiment_name
+      - mlflow.tracking_uri
+    outs:
+      - models/model.pkl
+    metrics:
+      - metrics/train_metrics.json:
+          cache: false
+
+  evaluate:
+    cmd: python src/evaluate.py
+    wdir: .
+    deps:
+      - src/evaluate.py
+      - src/utils.py
+      - models/model.pkl
+      - data/processed/test.csv
+    metrics:
+      - metrics/eval_metrics.json:
+          cache: false
+    plots:
+      - reports/confusion_matrix.png:
+          cache: false

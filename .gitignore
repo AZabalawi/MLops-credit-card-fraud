@@ -1,0 +1,34 @@
+# DVC-tracked data & model artifacts (regenerated via `dvc repro`)
+/data/processed
+/models
+
+# Raw data is version-tracked by DVC (data/raw/creditcard.csv.dvc is committed);
+# the large CSV itself is kept out of git.
+/data/raw/creditcard.csv
+
+# MLflow local tracking store (regenerated when experiments are run)
+mlruns/
+mlflow.db
+mlartifacts/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+
+# OS / editor cruft
+.DS_Store
+.vscode/
+.idea/
+
+# DVC cache
+/.dvc/cache
+/.dvc/tmp
+
+# Reports generated at runtime
+/reports/*.png
+/reports/*.txt

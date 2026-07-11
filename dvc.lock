@@ -1,0 +1,98 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - path: data/raw/creditcard.csv
+      hash: md5
+      md5: e90efcb83d69faf99fcab8b0255024de
+      size: 150828752
+    - path: src/prepare.py
+      hash: md5
+      md5: 136fe778a116b323d66dc7f0984ba8c0
+      size: 5492
+    - path: src/utils.py
+      hash: md5
+      md5: 40f866d6367e46eca51af7dfceb623d5
+      size: 2059
+    params:
+      params.yaml:
+        data.drop_duplicates: true
+        data.random_state: 42
+        data.raw_path: data/raw/creditcard.csv
+        data.test_size: 0.2
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 05167fb704f1d66f7e63570510d06791
+      size: 30050046
+    - path: data/processed/train.csv
+      hash: md5
+      md5: b7e2f9195e8c34778b713301d1642c58
+      size: 120198450
+    - path: metrics/data_quality_report.json
+      hash: md5
+      md5: 57731aeb4b1dcdda1be7ab7a13541838
+      size: 427
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: b7e2f9195e8c34778b713301d1642c58
+      size: 120198450
+    - path: src/train.py
+      hash: md5
+      md5: fe3aad2222f4eed272c6468da7b777ac
+      size: 5854
+    - path: src/utils.py
+      hash: md5
+      md5: 40f866d6367e46eca51af7dfceb623d5
+      size: 2059
+    params:
+      params.yaml:
+        mlflow.experiment_name: creditcard-fraud-detection
+        mlflow.tracking_uri: sqlite:///mlflow.db
+        model.class_weight: balanced
+        model.max_depth: 12
+        model.min_samples_split: 2
+        model.n_estimators: 100
+        model.n_jobs: -1
+        model.random_state: 42
+    outs:
+    - path: metrics/train_metrics.json
+      hash: md5
+      md5: 47d22a0f7a50e708a854bd0f36da30c9
+      size: 51
+    - path: models/model.pkl
+      hash: md5
+      md5: 73c6b342e81c2bd3cb3d062331190947
+      size: 1891938
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 05167fb704f1d66f7e63570510d06791
+      size: 30050046
+    - path: models/model.pkl
+      hash: md5
+      md5: 73c6b342e81c2bd3cb3d062331190947
+      size: 1891938
+    - path: src/evaluate.py
+      hash: md5
+      md5: 876f919cee63c57e591fa39e94af0658
+      size: 4860
+    - path: src/utils.py
+      hash: md5
+      md5: 40f866d6367e46eca51af7dfceb623d5
+      size: 2059
+    outs:
+    - path: metrics/eval_metrics.json
+      hash: md5
+      md5: 9b6b454e06f2d5419c298449e6f86a4e
+      size: 132
+    - path: reports/confusion_matrix.png
+      hash: md5
+      md5: 800ff3c73aaab538383db8b5314994f0
+      size: 40466

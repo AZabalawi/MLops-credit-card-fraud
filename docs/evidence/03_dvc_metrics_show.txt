@@ -1,0 +1,4 @@
+$ dvc metrics show
+Path                        accuracy    f1_score    pr_auc    precision    recall    roc_auc    train_pr_auc    train_roc_auc
+metrics/train_metrics.json  -           -           -         -            -         -          0.979           1.0
+metrics/eval_metrics.json   0.99938     0.7977      0.7853    0.8846       0.7263    0.9567     -               -
