@@ -29,10 +29,11 @@ Outputs:
 """
 
 import json
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from utils import load_params, get_logger, ensure_dir
+from utils import ensure_dir, get_logger, load_params
 
 logger = get_logger(__name__)
 

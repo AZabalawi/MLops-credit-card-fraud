@@ -1,10 +1,15 @@
-# DVC-tracked data & model artifacts (regenerated via `dvc repro`)
+# DVC-tracked data artifacts (regenerated via `dvc repro`)
 /data/processed
-/models
 
 # Raw data is version-tracked by DVC (data/raw/creditcard.csv.dvc is committed);
 # the large CSV itself is kept out of git.
 /data/raw/creditcard.csv
+
+# Models: the served artifact IS committed, because Render builds the Docker
+# image straight from this repository and the image has to contain the model.
+# Everything else in models/ is a local by-product of retraining.
+/models/*
+!/models/model.pkl
 
 # MLflow local tracking store (regenerated when experiments are run)
 mlruns/
@@ -19,6 +24,14 @@ __pycache__/
 venv/
 env/
 *.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Secrets - the Render deploy hook lives in GitHub Actions secrets, never here
+.env
+.env.*
+*.pem
+*.key
 
 # OS / editor cruft
 .DS_Store

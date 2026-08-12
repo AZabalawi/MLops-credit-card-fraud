@@ -1,0 +1,46 @@
+{
+  "note": "SIMULATED DRIFT FOR DEMONSTRATION - not real production traffic.",
+  "seed": 42,
+  "shift_std": 1.5,
+  "amount_factor": 2.5,
+  "drifted_columns": [
+    "V1",
+    "V2",
+    "V3",
+    "V4",
+    "V5",
+    "V6",
+    "V7",
+    "V8",
+    "V9",
+    "V10",
+    "V12",
+    "V14",
+    "V16",
+    "V17",
+    "V18",
+    "Time",
+    "Amount"
+  ],
+  "n_drifted_columns": 17,
+  "n_monitored_columns": 30,
+  "files": {
+    "reference_sample.csv": {
+      "rows": 10000,
+      "source": "data/processed/train.csv"
+    },
+    "current_normal.csv": {
+      "rows": 5000,
+      "source": "data/processed/test.csv"
+    },
+    "current_drifted.csv": {
+      "rows": 5000,
+      "source": "current_normal.csv + simulated shift"
+    },
+    "labeled_batch.csv": {
+      "rows": 5000,
+      "source": "data/processed/train.csv + simulated shift, labels kept",
+      "fraud_rows": 8
+    }
+  }
+}

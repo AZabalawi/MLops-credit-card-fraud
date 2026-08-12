@@ -1,0 +1,6 @@
+{
+  "public_api_url": "https://mai201-fraud-api.onrender.com",
+  "repo_url": "https://github.com/AZabalawi/MLops-credit-card-fraud",
+  "platform": "Render (Docker web service, free plan)",
+  "note": "Written by the team after the Render service was created; build_deck.js reads it so the deck never hard-codes the URL."
+}

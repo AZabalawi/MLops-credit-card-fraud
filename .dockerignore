@@ -1,0 +1,49 @@
+# Keep the build context small: only app/, models/model.pkl and
+# requirements-api.txt are actually copied into the image.
+
+.git
+.github
+.dvc
+.dvcignore
+.gitignore
+
+# Data and training artefacts - the API does not need them
+data/
+monitoring/
+mlruns/
+mlartifacts/
+mlflow.db
+metrics/
+reports/
+docs/
+presentation/
+src/
+tests/
+
+# Every model except the one we serve
+models/*
+!models/model.pkl
+
+# Local tooling
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Environment files must never reach the image
+.env
+.env.*
+*.pem
+*.key
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+*.md
+!README.md

@@ -1,0 +1,151 @@
+name: CI/CD
+
+# Pull requests get linted and tested but never deploy. Only a push that
+# lands on main - after both checks pass - triggers the Render deployment.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  IMAGE_NAME: fraud-api
+
+jobs:
+  lint-and-test:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Lint with Ruff
+        run: ruff check .
+
+      - name: Run tests with pytest
+        run: pytest -v
+
+  docker-build:
+    name: Build and smoke-test the image
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Build the image
+        run: docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
+
+      - name: Start the container
+        run: |
+          docker run -d --name fraud-api -p 8000:8000 \
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Wait for the API to become healthy
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/health > /tmp/health.json; then
+              echo "Healthy after ${attempt} attempt(s):"
+              cat /tmp/health.json
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "The container never became healthy. Logs:"
+          docker logs fraud-api
+          exit 1
+
+      - name: Check /health reports the model as loaded
+        run: |
+          test "$(jq -r '.status' /tmp/health.json)" = "healthy"
+          test "$(jq -r '.model_loaded' /tmp/health.json)" = "true"
+
+      - name: Check the Swagger page is served
+        run: curl -fsS -o /dev/null -w '/docs -> %{http_code}\n' http://localhost:8000/docs
+
+      - name: Make a real prediction against the container
+        run: |
+          curl -fsS -X POST http://localhost:8000/predict \
+            -H 'Content-Type: application/json' \
+            -d @presentation/sample_requests/fraud.json > /tmp/predict.json
+          cat /tmp/predict.json
+          probability=$(jq -r '.fraud_probability' /tmp/predict.json)
+          jq -e '.predicted_class == 0 or .predicted_class == 1' /tmp/predict.json > /dev/null
+          awk -v p="$probability" 'BEGIN { exit !(p >= 0 && p <= 1) }'
+
+      - name: Check an invalid request is rejected
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
+            http://localhost:8000/predict -H 'Content-Type: application/json' \
+            -d '{"Time": 0}')
+          echo "invalid payload -> HTTP ${code}"
+          test "$code" = "422"
+
+      - name: Container logs
+        if: always()
+        run: docker logs fraud-api || true
+
+      - name: Stop the container
+        if: always()
+        run: docker rm -f fraud-api || true
+
+  deploy:
+    name: Deploy to Render
+    needs: [lint-and-test, docker-build]
+    # Production deploys happen only for pushes that land on main.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "${RENDER_DEPLOY_HOOK_URL}" ]; then
+            echo "::error::RENDER_DEPLOY_HOOK_URL is not set. Add it under" \
+                 "Settings > Secrets and variables > Actions > Secrets."
+            exit 1
+          fi
+          # The hook URL itself is the credential, so nothing is echoed here.
+          curl -fsS -X POST "${RENDER_DEPLOY_HOOK_URL}" -o /tmp/deploy.json
+          echo "Render accepted the deploy request."
+
+      - name: Wait for the deployed service to report healthy
+        env:
+          PUBLIC_API_URL: ${{ vars.PUBLIC_API_URL }}
+        run: |
+          if [ -z "${PUBLIC_API_URL}" ]; then
+            echo "::notice::PUBLIC_API_URL variable is not set, skipping the" \
+                 "post-deploy health check."
+            exit 0
+          fi
+          echo "Polling ${PUBLIC_API_URL}/health"
+          for attempt in $(seq 1 60); do
+            if curl -fsS "${PUBLIC_API_URL}/health" > /tmp/live.json; then
+              cat /tmp/live.json
+              if [ "$(jq -r '.status' /tmp/live.json)" = "healthy" ]; then
+                echo "Deployment is live and healthy."
+                exit 0
+              fi
+            fi
+            sleep 10
+          done
+          echo "::error::The service did not report healthy within 10 minutes."
+          exit 1

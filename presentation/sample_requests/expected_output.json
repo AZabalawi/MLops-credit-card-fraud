@@ -1,0 +1,16 @@
+{
+  "legitimate": {
+    "source_row_index_in_test_csv": 0,
+    "true_class": 0,
+    "predicted_class": 0,
+    "fraud_probability": 0.000235,
+    "label": "legitimate"
+  },
+  "fraud": {
+    "source_row_index_in_test_csv": 845,
+    "true_class": 1,
+    "predicted_class": 1,
+    "fraud_probability": 0.969592,
+    "label": "fraud"
+  }
+}

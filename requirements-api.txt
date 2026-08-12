@@ -1,0 +1,16 @@
+# Serving dependencies only - this is what goes into the Docker image.
+#
+# Fully pinned on purpose. models/model.pkl is a pickled scikit-learn object,
+# so the container has to install the same scikit-learn/numpy the pipeline was
+# fitted with; a floating version would eventually load the artifact under a
+# library that pickled it differently.
+
+fastapi==0.141.1
+uvicorn==0.52.1
+pydantic==2.13.4
+scikit-learn==1.7.2
+pandas==2.3.3
+numpy==2.2.6
+scipy==1.15.3
+joblib==1.5.3
+threadpoolctl==3.6.0

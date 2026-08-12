@@ -34,7 +34,13 @@ stages:
       - mlflow.experiment_name
       - mlflow.tracking_uri
     outs:
-      - models/model.pkl
+      # cache: false keeps DVC tracking this output's hash in dvc.lock while
+      # leaving the file in Git instead of the DVC cache. Phase 2 needs it in
+      # the repository: Render builds the Docker image straight from GitHub, so
+      # the trained pipeline has to be present at build time. The artifact is
+      # only ~1.9 MB, which makes that a reasonable trade.
+      - models/model.pkl:
+          cache: false
     metrics:
       - metrics/train_metrics.json:
           cache: false

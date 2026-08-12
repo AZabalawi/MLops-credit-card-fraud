@@ -6,10 +6,11 @@ evaluate). Keeping this logic in one place avoids code duplication and
 keeps each stage script focused on its single responsibility.
 """
 
+import logging
 import os
 import sys
+
 import yaml
-import logging
 
 
 def load_params(params_path: str = "params.yaml") -> dict:
@@ -38,11 +39,11 @@ def load_params(params_path: str = "params.yaml") -> dict:
             f"Could not find '{params_path}'. Make sure you run this "
             f"script from the project root directory."
         )
-    with open(params_path, "r") as f:
+    with open(params_path) as f:
         try:
             params = yaml.safe_load(f)
         except yaml.YAMLError as exc:
-            raise yaml.YAMLError(f"Error parsing {params_path}: {exc}")
+            raise yaml.YAMLError(f"Error parsing {params_path}: {exc}") from exc
     return params
 
 

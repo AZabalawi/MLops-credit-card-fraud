@@ -1,0 +1,21 @@
+# What CI installs to lint and test. Deliberately excludes DVC, matplotlib and
+# seaborn: the test suite never touches the plotting or data-versioning code,
+# and leaving them out keeps the workflow noticeably faster.
+
+# runtime pieces the tests import
+fastapi==0.141.1
+uvicorn==0.52.1
+pydantic==2.13.4
+scikit-learn==1.7.2
+pandas==2.3.3
+numpy==2.2.6
+scipy==1.15.3
+joblib==1.5.3
+PyYAML>=6.0.0
+mlflow==3.14.0
+evidently==0.7.21
+
+# test + lint tooling
+pytest==9.1.1
+httpx==0.28.1
+ruff==0.16.2

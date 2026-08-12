@@ -1,0 +1,20 @@
+# Render Blueprint - describes the deployed service as code so it can be
+# recreated without clicking through the dashboard.
+#
+# autoDeploy is off on purpose: deployments are triggered by the GitHub
+# Actions workflow through a deploy hook, and only after linting, the test
+# suite and the Docker smoke test have passed. If Render also deployed on
+# every push, code that failed CI would still reach production.
+
+services:
+  - type: web
+    name: mai201-fraud-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      - key: DECISION_THRESHOLD
+        value: "0.5"

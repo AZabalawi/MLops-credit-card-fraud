@@ -1,0 +1,233 @@
+{
+  "scenario": "reference",
+  "generated_at": "2026-08-12T02:54:15+00:00",
+  "evidently_version": "0.7.21",
+  "reference_path": "monitoring/data/reference_sample.csv",
+  "current_path": "monitoring/data/current_normal.csv",
+  "reference_rows": 10000,
+  "current_rows": 5000,
+  "n_monitored_columns": 30,
+  "monitored_columns": [
+    "Time",
+    "V1",
+    "V2",
+    "V3",
+    "V4",
+    "V5",
+    "V6",
+    "V7",
+    "V8",
+    "V9",
+    "V10",
+    "V11",
+    "V12",
+    "V13",
+    "V14",
+    "V15",
+    "V16",
+    "V17",
+    "V18",
+    "V19",
+    "V20",
+    "V21",
+    "V22",
+    "V23",
+    "V24",
+    "V25",
+    "V26",
+    "V27",
+    "V28",
+    "Amount"
+  ],
+  "excluded_columns": [
+    "Class"
+  ],
+  "dataset_drift_detected": false,
+  "drifted_columns_count": 0,
+  "drifted_columns_share": 0.0,
+  "drift_share_threshold": 0.5,
+  "drifted_columns": [],
+  "column_drift": {
+    "Time": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.030939286155657036,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V1": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.01457631446882482,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V2": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.02159944173067225,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V3": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.028481660876473483,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V4": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.02171668965556856,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V5": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.027448140966383913,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V6": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.02239698512889334,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V7": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.02409574150695523,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V8": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.01659278936365787,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V9": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.024049532297275005,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V10": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.03383816676993725,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V11": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.037173102151602085,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V12": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.02237728570553162,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V13": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.01855001776134027,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V14": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.020432184332206265,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V15": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.026052118836895632,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V16": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.02963546698909174,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V17": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.015033657516433619,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V18": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.016966619651226415,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V19": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.014550544165580628,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V20": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.025760809351757574,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V21": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.02697227246204031,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V22": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.02322422018209261,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V23": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.03411795171672201,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V24": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.021077450227007962,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V25": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.03767216411978479,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V26": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.024438858105058688,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V27": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.03179660994327113,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "V28": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.03072521473838147,
+      "threshold": 0.1,
+      "drifted": false
+    },
+    "Amount": {
+      "method": "Wasserstein distance (normed)",
+      "score": 0.015256165606314447,
+      "threshold": 0.1,
+      "drifted": false
+    }
+  },
+  "html_report": "monitoring/reports/reference_report.html"
+}

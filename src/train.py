@@ -29,17 +29,18 @@ Outputs:
 """
 
 import json
+
 import joblib
 import mlflow
 import mlflow.sklearn
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import roc_auc_score, average_precision_score
+from sklearn.metrics import average_precision_score, roc_auc_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from utils import load_params, get_logger, ensure_dir
+from utils import ensure_dir, get_logger, load_params
 
 logger = get_logger(__name__)
 

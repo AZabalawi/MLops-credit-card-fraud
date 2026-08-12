@@ -22,25 +22,27 @@ Outputs:
 """
 
 import json
+
 import joblib
+import matplotlib
 import mlflow
 import pandas as pd
-import matplotlib
+
 matplotlib.use("Agg")  # headless backend, no display needed
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import (
     accuracy_score,
+    average_precision_score,
+    classification_report,
+    confusion_matrix,
+    f1_score,
     precision_score,
     recall_score,
-    f1_score,
     roc_auc_score,
-    average_precision_score,
-    confusion_matrix,
-    classification_report,
 )
 
-from utils import load_params, get_logger, ensure_dir
+from utils import ensure_dir, get_logger, load_params
 
 logger = get_logger(__name__)
 

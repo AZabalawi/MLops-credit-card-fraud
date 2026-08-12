@@ -1,0 +1,31 @@
+# Tooling configuration for the Phase 2 code (linting + tests).
+# The DVC pipeline and MLflow settings stay in params.yaml / dvc.yaml.
+
+[tool.ruff]
+line-length = 100
+# The container and CI run Python 3.11, but the code is kept 3.10-compatible so
+# the pipeline also runs on an older local interpreter. Ruff enforces that:
+# with py310 it will not suggest 3.11-only syntax such as datetime.UTC.
+target-version = "py310"
+extend-exclude = [".dvc", "mlruns", "mlartifacts", "data", "models", "monitoring/reports"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "C4"]
+
+[tool.ruff.lint.per-file-ignores]
+# evaluate.py has to call matplotlib.use("Agg") before importing pyplot, which
+# means an import cannot sit at the top of the file.
+"src/evaluate.py" = ["E402"]
+# Test helpers deliberately reach into private attributes to prove the API
+# returns the model's own output.
+"tests/*" = ["SLF001"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "monitoring", "src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
