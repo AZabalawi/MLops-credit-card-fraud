@@ -14,9 +14,18 @@ so everything is built around that: stratified splitting,
 `class_weight="balanced"`, and precision / recall / F1 / ROC-AUC / PR-AUC
 instead of plain accuracy.
 
-**Live API:** https://mai201-fraud-api.onrender.com
+**Live API:** https://mai201-fraud-api.onrender.com — deployed and responding
 **Swagger UI:** https://mai201-fraud-api.onrender.com/docs
 **Health:** https://mai201-fraud-api.onrender.com/health
+
+```json
+{"status":"healthy","model_loaded":true,"model_path":"/srv/app/models/model.pkl","version":"2.0.0"}
+```
+
+The current deployment was released by the CI/CD pipeline from commit
+`363892b`, with all three jobs green (lint and test, build and smoke-test the
+image, deploy to Render). Render reports the service as **Live**, triggered by
+the deploy hook.
 
 > The service runs on Render's free plan, which sleeps when idle. The first
 > request after a quiet period can take 30-60 seconds while the container wakes
@@ -347,6 +356,27 @@ check path `/health`.
 **Swagger UI:** https://mai201-fraud-api.onrender.com/docs
 **Health:** https://mai201-fraud-api.onrender.com/health
 
+Inside the container the model is loaded from `/srv/app/models/model.pkl`,
+which is the path `MODEL_PATH` is set to in the `Dockerfile` — the running
+service reports it back on `/health`.
+
+Checked against the deployed service:
+
+| Check | Result |
+|---|---|
+| `GET /health` | 200, `status: healthy`, `model_loaded: true`, `version: 2.0.0` |
+| `GET /docs` | Swagger UI loads |
+| `POST /predict` with `presentation/sample_requests/legitimate.json` | 200, `predicted_class: 0`, `label: legitimate`, `fraud_probability: 0.000235` |
+
+That probability is the same value the artifact produces locally, which is what
+we would expect: the container ships the identical `models/model.pkl` and a
+Random Forest is deterministic.
+
+The deployment details are recorded in
+[`presentation/deploy_info.json`](presentation/deploy_info.json), which the
+presentation build script also reads, so the URL is written down once rather
+than copied around.
+
 Render's own auto-deploy is switched **off**. Deployments are triggered by the
 GitHub Actions workflow through a deploy hook, and only after linting, the
 tests and the container smoke test have passed — otherwise code that failed CI
@@ -422,6 +452,11 @@ to `main`, every pull request against `main`, and on manual dispatch.
 
 Pull requests run linting, the tests and the container smoke test, but never
 deploy.
+
+The pipeline has run green end to end on commit `363892b`: **Lint and test**,
+**Build and smoke-test the image**, and **Deploy to Render** all passed, and
+Render recorded the resulting deployment as Live with the deploy hook as its
+trigger.
 
 ---
 
@@ -614,6 +649,11 @@ stages.
 - **No DVC remote is configured.** `.dvc/config` is empty, so `dvc pull` will
   not fetch the raw CSV — it has to come from Kaggle. Adding a remote
   (`dvc remote add -d myremote <url>` then `dvc push`) would remove that step.
+- **`dvc status` on a fresh clone reports "not in cache".** The DVC cache is a
+  local directory and is gitignored, so a clone starts without one. The
+  pipeline outputs themselves are unchanged — every hash in `dvc.lock` matches
+  the file on disk. Running `dvc commit` (or `dvc repro`) once populates the
+  local cache and the message goes away.
 - **No secrets are in the repository.** The Render deploy hook lives in GitHub
   Actions secrets; `.env` files, keys and certificates are gitignored.
 
@@ -625,15 +665,15 @@ stages.
 |---|---|---|
 | Model deployed as a FastAPI endpoint | Done | [`app/`](app/), `/docs` on the live service |
 | Containerised with Docker | Done | [`Dockerfile`](Dockerfile), built and smoke-tested in CI |
-| Deployed to the cloud | Done | Render — https://mai201-fraud-api.onrender.com |
-| CI/CD pipeline with GitHub Actions | Done | [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml) |
+| Deployed to the cloud | Done | Render — https://mai201-fraud-api.onrender.com, `/health` returns 200 |
+| CI/CD pipeline with GitHub Actions | Done | [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml) — green on `363892b` |
 | CI runs tests | Done | `pytest -v`, 34 tests |
 | CI runs linting | Done | `ruff check .` |
-| CI auto-deploys | Done | `deploy` job, `main` branch only, after CI passes |
+| CI auto-deploys | Done | `deploy` job fired the Render hook on `363892b`; deployment Live |
 | Monitoring implemented | Done | [`monitoring/drift.py`](monitoring/drift.py) |
 | Drift detection with EvidentlyAI | Done | Evidently 0.7.21, `DataDriftPreset` |
 | Retraining implemented | Done | [`monitoring/retraining.py`](monitoring/retraining.py) |
-| Public API URL | Done | https://mai201-fraud-api.onrender.com |
+| Public API URL | Done | https://mai201-fraud-api.onrender.com — live, verified |
 | Drift reports delivered | Done | [`monitoring/reports/`](monitoring/reports/) |
 | Model Card delivered | Done | [`MODEL_CARD.md`](MODEL_CARD.md) |
 | Presentation slides delivered | Done | [`presentation/MAI201_Phase2_Final_Presentation.pptx`](presentation/MAI201_Phase2_Final_Presentation.pptx) |

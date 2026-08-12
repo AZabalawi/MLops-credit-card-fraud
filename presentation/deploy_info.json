@@ -1,6 +1,39 @@
 {
   "public_api_url": "https://mai201-fraud-api.onrender.com",
+  "docs_url": "https://mai201-fraud-api.onrender.com/docs",
+  "health_url": "https://mai201-fraud-api.onrender.com/health",
   "repo_url": "https://github.com/AZabalawi/MLops-credit-card-fraud",
-  "platform": "Render (Docker web service, free plan)",
-  "note": "Written by the team after the Render service was created; build_deck.js reads it so the deck never hard-codes the URL."
+  "platform": "Render - Docker web service, free plan, health check path /health",
+  "auto_deploy_on_render": false,
+  "deployed_model_path_in_container": "/srv/app/models/model.pkl",
+  "serving_version": "2.0.0",
+  "ci_commit": "363892b",
+  "ci_jobs_passed": [
+    "Lint and test",
+    "Build and smoke-test the image",
+    "Deploy to Render"
+  ],
+  "render_deployment": {
+    "name": "Trigger Phase 2 CI/CD",
+    "commit": "363892b",
+    "trigger": "Deploy Hook",
+    "status": "Live"
+  },
+  "verified_health_response": {
+    "status": "healthy",
+    "model_loaded": true,
+    "model_path": "/srv/app/models/model.pkl",
+    "version": "2.0.0"
+  },
+  "verified_live_prediction": {
+    "request": "presentation/sample_requests/legitimate.json",
+    "http_status": 200,
+    "predicted_class": 0,
+    "label": "legitimate",
+    "fraud_probability": 0.000235,
+    "decision_threshold": 0.5,
+    "is_fraud": false,
+    "model_version": "2.0.0"
+  },
+  "note": "build_deck.js and the README read this file, so the deployment details are written down once. No credential or deploy hook is recorded here."
 }

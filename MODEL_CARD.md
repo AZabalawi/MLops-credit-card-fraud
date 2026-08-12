@@ -242,8 +242,24 @@ so the scikit-learn that loads `model.pkl` is the same version that fitted it.
 | `POST /predict` | score one transaction |
 | `GET /docs` | Swagger UI |
 
-The public URL is in the README. No credentials are baked into the image; the
-Render deploy hook lives in GitHub Actions secrets.
+The service is live at **https://mai201-fraud-api.onrender.com** (Swagger UI at
+`/docs`). Inside the container the artifact is loaded from
+`/srv/app/models/model.pkl`, the path `MODEL_PATH` is set to in the
+`Dockerfile`, and the running service reports that back on `/health`:
+
+```json
+{"status":"healthy","model_loaded":true,"model_path":"/srv/app/models/model.pkl","version":"2.0.0"}
+```
+
+The deployment was released by the CI/CD pipeline from commit `363892b` after
+linting, the test suite and the container smoke test all passed. A request to
+the deployed `/predict` with the legitimate sample transaction returns
+`predicted_class 0` and `fraud_probability 0.000235`, the same value the
+artifact produces locally — the container ships the identical `model.pkl`, and
+a Random Forest at a fixed threshold is deterministic.
+
+No credentials are baked into the image; the Render deploy hook lives in GitHub
+Actions secrets.
 
 **On the scikit-learn pin.** Phase 1 pinned 1.8.0, which needs Python 3.11 or
 newer. Phase 2 pins 1.7.2 so the training environment, the test environment and

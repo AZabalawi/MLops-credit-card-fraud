@@ -27,6 +27,7 @@ const deploy = readJson("presentation/deploy_info.json");
 
 const API = deploy.public_api_url;
 const REPO = deploy.repo_url;
+const CI_COMMIT = deploy.ci_commit;
 
 /* palette: navy operations console, signal red for fraud, teal for infrastructure */
 const NAVY = "10233F";
@@ -498,17 +499,25 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
   });
 
   card(s, { x: 0.75, y: 4.72, w: 11.85, h: 1.98, fill: NAVY });
+  numberCircle(s, 1.1, 4.93, 0.3, "", GREEN);
   s.addText("Live now", {
-    x: 1.1, y: 4.95, w: 4.0, h: 0.32, margin: 0,
-    fontFace: BODY_FONT, fontSize: 12, bold: true, color: "8FA6C4",
+    x: 1.52, y: 4.9, w: 4.0, h: 0.34, margin: 0,
+    fontFace: BODY_FONT, fontSize: 12, bold: true, color: "8FA6C4", valign: "middle",
   });
   s.addText(API, {
-    x: 1.1, y: 5.3, w: 11.1, h: 0.5, margin: 0,
+    x: 1.1, y: 5.26, w: 11.1, h: 0.5, margin: 0,
     fontFace: MONO, fontSize: 19, bold: true, color: "9FE8D6", valign: "middle",
   });
-  s.addText(`Swagger UI at ${API}/docs   ·   health check at ${API}/health`, {
-    x: 1.1, y: 5.9, w: 11.1, h: 0.4, margin: 0,
-    fontFace: BODY_FONT, fontSize: 12, color: "CADCFC", valign: "middle",
+  s.addText(
+    '/health  ->  {"status":"healthy","model_loaded":true,"model_path":"/srv/app/models/model.pkl"}',
+    {
+      x: 1.1, y: 5.82, w: 11.1, h: 0.34, margin: 0,
+      fontFace: MONO, fontSize: 10.5, color: "CADCFC", valign: "middle",
+    }
+  );
+  s.addText(`Swagger UI at ${API}/docs   ·   released by CI/CD from commit ${CI_COMMIT}`, {
+    x: 1.1, y: 6.18, w: 11.1, h: 0.34, margin: 0,
+    fontFace: BODY_FONT, fontSize: 11, color: "8FA6C4", valign: "middle",
   });
 
   s.addNotes(
@@ -520,8 +529,10 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
     "install the same version that fitted it, otherwise loading it is a gamble. The " +
     "container runs as a non-root user, holds no secrets, and listens on the port Render " +
     "injects. It is deployed on Render as a Docker web service with the health check " +
-    "pointed at /health, and that is the public URL on the screen. We will hit it live in " +
-    "a moment."
+    "pointed at /health, and that is the public URL on the screen. It is live right " +
+    "now: /health comes back healthy, with model_loaded true and the model path " +
+    "inside the container. This version was released by the CI/CD pipeline, not by " +
+    "anyone clicking deploy. We will hit it live in a moment."
   );
 }
 
@@ -559,7 +570,7 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
     }
   });
 
-  card(s, { x: 0.75, y: 3.8, w: 5.85, h: 2.9 });
+  card(s, { x: 0.75, y: 3.8, w: 5.85, h: 2.72 });
   s.addText("The container is tested, not just built", {
     x: 1.05, y: 4.0, w: 5.3, h: 0.35, margin: 0,
     fontFace: BODY_FONT, fontSize: 14.5, bold: true, color: INK,
@@ -576,7 +587,7 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
     }
   );
 
-  card(s, { x: 7.0, y: 3.8, w: 5.6, h: 2.9 });
+  card(s, { x: 7.0, y: 3.8, w: 5.6, h: 2.72 });
   s.addText("Pull request vs. main", {
     x: 7.3, y: 4.0, w: 5.0, h: 0.35, margin: 0,
     fontFace: BODY_FONT, fontSize: 14.5, bold: true, color: INK,
@@ -586,9 +597,17 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
   iconRow(s, 7.3, 5.35, 5.0, "M", "Push to main",
     "The same checks run first; only if they all pass does the deploy job fire.", RED);
   s.addText("Render auto-deploy is switched off on purpose — CI is the only route to production.", {
-    x: 7.3, y: 6.15, w: 5.0, h: 0.45, margin: 0,
+    x: 7.3, y: 6.12, w: 5.0, h: 0.45, margin: 0,
     fontFace: BODY_FONT, fontSize: 10.5, italic: true, color: MUTED, valign: "top",
   });
+  card(s, { x: 0.75, y: 6.76, w: 11.85, h: 0.42, fill: "E7F3EC" });
+  s.addText(
+    `All three jobs green on commit ${CI_COMMIT} — lint and test, build and smoke-test the image, deploy to Render.`,
+    {
+      x: 1.05, y: 6.76, w: 11.25, h: 0.42, margin: 0,
+      fontFace: BODY_FONT, fontSize: 11, bold: true, color: GREEN, valign: "middle",
+    }
+  );
 
   s.addNotes(
     "MOHAMED (0:50). The workflow is one file, .github/workflows/ci-cd.yml, and it runs " +
@@ -601,7 +620,9 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
     "if all of that passes, and only on the main branch, does the deploy job fire the " +
     "Render deploy hook, which is stored as a GitHub secret and never appears in the " +
     "code. We deliberately turned Render's own auto-deploy off, so nothing reaches " +
-    "production without passing CI first."
+    "production without passing CI first. The run you can see on screen is commit " +
+    "363892b, where all three jobs passed and the deploy job released the version " +
+    "that is serving right now."
   );
 }
 
@@ -815,7 +836,7 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
     ["1", "Open the public Swagger UI", `${API}/docs`],
     ["2", "Call /health", "200, model_loaded: true"],
     ["3", "POST a real fraud transaction", "expect 0.9696 and label fraud"],
-    ["4", "Show the GitHub Actions run", "lint, tests, container smoke test, deploy"],
+    ["4", "Show the GitHub Actions run", `commit ${CI_COMMIT} — all three jobs green`],
     ["5", "Open the Evidently drift report", "17 of 30 columns flagged"],
   ];
   steps.forEach(([n, head, detail], i) => {
@@ -871,9 +892,9 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
   s.addNotes(
     "SOMEYAH (0:40 plus about 1:30 of demo). Let me show it working. [Demo: open the " +
     "public Swagger page, call health and show model_loaded true, post the fraud " +
-    "transaction and show the 0.9696 probability, then the GitHub Actions run with lint, " +
-    "tests, the container smoke test and the deploy step, and finally the Evidently " +
-    "report with 17 of 30 columns flagged.] To close: Phase 1 gave us a model we could " +
+    "transaction and show the 0.9696 probability, then the legitimate one at 0.000235, " +
+    "then the GitHub Actions run for commit 363892b with all three jobs green, and " +
+    "finally the Evidently report with 17 of 30 columns flagged.] To close: Phase 1 gave us a model we could " +
     "reproduce. Phase 2 turned it into a service we can run, test, deploy and watch. If " +
     "we carried this further, the three things we would do are set the decision threshold " +
     "from the actual cost of a missed fraud versus a false alarm, log real requests so " +

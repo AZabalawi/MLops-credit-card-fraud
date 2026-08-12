@@ -6,6 +6,11 @@ which keeps the whole talk inside the 7-10 minute limit.
 Driver: **Someyah** (Documentation Lead). Abdulraouf answers model questions,
 Mohamed answers deployment questions.
 
+The service is deployed and responding at
+**https://mai201-fraud-api.onrender.com**, released by the CI/CD pipeline from
+commit `363892b` with all three jobs green. Everything below is a live call -
+there are no screenshots standing in for anything.
+
 ---
 
 ## Before you start
@@ -58,8 +63,11 @@ Switch to tab 2.
 Expected response:
 
 ```json
-{"status":"healthy","model_loaded":true,"model_path":"models/model.pkl","version":"2.0.0","detail":null}
+{"status":"healthy","model_loaded":true,"model_path":"/srv/app/models/model.pkl","version":"2.0.0","detail":null}
 ```
+
+The path is the one inside the container, which is a small but useful detail:
+it shows the answer is coming from the deployed image, not from a laptop.
 
 ### 3. A real prediction  (~40 seconds)
 
@@ -82,9 +90,14 @@ Expected response:
 }
 ```
 
-If there is time, paste `legitimate.json` instead and execute again - it comes
-back with `fraud_probability` of 0.000235 and label `legitimate`. The contrast
-lands well.
+Then paste `legitimate.json` and execute again - it comes back with
+`fraud_probability` 0.000235 and label `legitimate`. The contrast lands well,
+and this is the exact call we confirmed against the deployed service, so it is
+the safer one to lead with if you only have time for a single request.
+
+Both payloads and both expected outputs were exported from the held-out test
+split by `src/export_serving_assets.py`. They are the model's own numbers, not
+figures written into a slide.
 
 ### 4. CI/CD  (~20 seconds)
 
@@ -93,10 +106,16 @@ Switch to tab 3.
 > "Every push runs this workflow. Ruff lints the repository, pytest runs 34
 > tests against the real model, then Docker builds the image and CI starts the
 > container and probes it. Only after all of that passes does the deploy job
-> call the Render deploy hook."
+> call the Render deploy hook - which is what released the version we just
+> called."
 
-Click into the most recent successful run so the job list is visible. Do not
-click into individual step logs - there is not time.
+Open the run for commit **`363892b`** so the three green jobs are visible:
+**Lint and test**, **Build and smoke-test the image**, **Deploy to Render**.
+Do not click into individual step logs - there is not time.
+
+If anyone asks how the deploy is authenticated: the Render deploy hook is
+stored as a GitHub Actions secret and is never printed by the workflow. Do not
+open the secret settings page on the projector.
 
 ### 5. Drift report  (~25 seconds)
 
@@ -119,7 +138,7 @@ Use these if Swagger is slow or the projector struggles with the browser. Run
 them from the repository root.
 
 ```bash
-# health
+# health -> {"status":"healthy","model_loaded":true,...}
 curl -s https://mai201-fraud-api.onrender.com/health
 
 # a real fraud transaction
