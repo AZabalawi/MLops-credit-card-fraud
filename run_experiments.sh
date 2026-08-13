@@ -37,8 +37,8 @@ echo "=============================================="
 echo " Experiment 2/3: MORE TREES, DEEPER (balanced)"
 echo "=============================================="
 dvc exp run -f --name exp-more-trees-deeper \
-  -S model.n_estimators=200 \
-  -S model.max_depth=20 \
+  -S model.n_estimators=150 \
+  -S model.max_depth=16 \
   -S model.class_weight=balanced
 
 echo ""
