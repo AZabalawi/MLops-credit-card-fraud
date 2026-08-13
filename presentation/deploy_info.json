@@ -7,7 +7,6 @@
   "auto_deploy_on_render": false,
   "deployed_model_path_in_container": "/srv/app/models/model.pkl",
   "serving_version": "2.0.0",
-  "ci_commit": "363892b",
   "ci_jobs_passed": [
     "Lint and test",
     "Build and smoke-test the image",
@@ -15,9 +14,9 @@
   ],
   "render_deployment": {
     "name": "Trigger Phase 2 CI/CD",
-    "commit": "363892b",
     "trigger": "Deploy Hook",
-    "status": "Live"
+    "status": "Live",
+    "commit": "see the latest successful GitHub Actions run on main"
   },
   "verified_health_response": {
     "status": "healthy",
@@ -35,5 +34,7 @@
     "is_fraud": false,
     "model_version": "2.0.0"
   },
-  "note": "build_deck.js and the README read this file, so the deployment details are written down once. No credential or deploy hook is recorded here."
+  "note": "The README and the presentation read this file. No commit hash is pinned here on purpose: the Actions tab shows the currently deployed commit. No credential or deploy hook is recorded here.",
+  "drift_test_selected_by_evidently": "normalized Wasserstein distance, threshold 0.1",
+  "ci_release": "released automatically by the latest successful GitHub Actions CI/CD run on main"
 }

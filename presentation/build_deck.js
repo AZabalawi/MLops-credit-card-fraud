@@ -27,7 +27,6 @@ const deploy = readJson("presentation/deploy_info.json");
 
 const API = deploy.public_api_url;
 const REPO = deploy.repo_url;
-const CI_COMMIT = deploy.ci_commit;
 
 /* palette: navy operations console, signal red for fraud, teal for infrastructure */
 const NAVY = "10233F";
@@ -515,7 +514,7 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
       fontFace: MONO, fontSize: 10.5, color: "CADCFC", valign: "middle",
     }
   );
-  s.addText(`Swagger UI at ${API}/docs   ·   released by CI/CD from commit ${CI_COMMIT}`, {
+  s.addText(`Swagger UI at ${API}/docs   ·   released automatically by the latest successful CI/CD run`, {
     x: 1.1, y: 6.18, w: 11.1, h: 0.34, margin: 0,
     fontFace: BODY_FONT, fontSize: 11, color: "8FA6C4", valign: "middle",
   });
@@ -602,7 +601,7 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
   });
   card(s, { x: 0.75, y: 6.76, w: 11.85, h: 0.42, fill: "E7F3EC" });
   s.addText(
-    `All three jobs green on commit ${CI_COMMIT} — lint and test, build and smoke-test the image, deploy to Render.`,
+    "Latest main-branch CI/CD run — all three jobs green: lint and test, build and smoke-test the image, deploy to Render.",
     {
       x: 1.05, y: 6.76, w: 11.25, h: 0.42, margin: 0,
       fontFace: BODY_FONT, fontSize: 11, bold: true, color: GREEN, valign: "middle",
@@ -620,8 +619,8 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
     "if all of that passes, and only on the main branch, does the deploy job fire the " +
     "Render deploy hook, which is stored as a GitHub secret and never appears in the " +
     "code. We deliberately turned Render's own auto-deploy off, so nothing reaches " +
-    "production without passing CI first. The run you can see on screen is commit " +
-    "363892b, where all three jobs passed and the deploy job released the version " +
+    "production without passing CI first. The run on screen is the latest successful " +
+    "one on main, where all three jobs passed and the deploy job released the version " +
     "that is serving right now."
   );
 }
@@ -669,10 +668,12 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
   s.addText(
     "Reference: a fixed 10,000-row sample of the training split.\n" +
     "Current: 5,000 production-shaped rows.\n" +
-    "30 features compared with a K-S test; Class is excluded because the API never sees a label.",
+    "30 numeric features compared with Evidently's DataDriftPreset. In the generated " +
+    "reports Evidently selected normalized Wasserstein distance, threshold 0.1. " +
+    "Class is excluded because the API never receives the label.",
     {
-      x: 1.05, y: 5.25, w: 5.3, h: 1.3, margin: 0,
-      fontFace: BODY_FONT, fontSize: 11, color: MUTED, valign: "top", lineSpacing: 15,
+      x: 1.05, y: 5.22, w: 5.3, h: 1.42, margin: 0,
+      fontFace: BODY_FONT, fontSize: 10.2, color: MUTED, valign: "top", lineSpacing: 13,
     }
   );
 
@@ -713,7 +714,10 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
     "SOMEYAH (1:00). Monitoring answers one question: is the traffic still shaped like " +
     "what the model learned from? We use EvidentlyAI with the DataDriftPreset over the " +
     "30 input features. The reference is a fixed 10,000-row sample of the training split. " +
-    "We exclude Class, because the API never receives a label at prediction time. We ran " +
+    "We exclude Class, because the API never receives a label at prediction time. " +
+    "Evidently picks the test itself from the data - at these batch sizes it chose " +
+    "normalized Wasserstein distance with a threshold of 0.1, and that choice is " +
+    "recorded in our JSON summary next to every score. We ran " +
     "two scenarios. The first is a control: untouched rows from the test split. Evidently " +
     "flags zero of 30 columns — no drift, which tells us the monitor is not just alarmed " +
     "by everything. The second is a deliberately drifted batch: we applied a seeded shift " +
@@ -836,7 +840,7 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
     ["1", "Open the public Swagger UI", `${API}/docs`],
     ["2", "Call /health", "200, model_loaded: true"],
     ["3", "POST a real fraud transaction", "expect 0.9696 and label fraud"],
-    ["4", "Show the GitHub Actions run", `commit ${CI_COMMIT} — all three jobs green`],
+    ["4", "Show the GitHub Actions run", "latest main-branch run — all three jobs green"],
     ["5", "Open the Evidently drift report", "17 of 30 columns flagged"],
   ];
   steps.forEach(([n, head, detail], i) => {
@@ -893,7 +897,7 @@ const pct = (v) => `${(v * 100).toFixed(1)}%`;
     "SOMEYAH (0:40 plus about 1:30 of demo). Let me show it working. [Demo: open the " +
     "public Swagger page, call health and show model_loaded true, post the fraud " +
     "transaction and show the 0.9696 probability, then the legitimate one at 0.000235, " +
-    "then the GitHub Actions run for commit 363892b with all three jobs green, and " +
+    "then the latest successful GitHub Actions run with all three jobs green, and " +
     "finally the Evidently report with 17 of 30 columns flagged.] To close: Phase 1 gave us a model we could " +
     "reproduce. Phase 2 turned it into a service we can run, test, deploy and watch. If " +
     "we carried this further, the three things we would do are set the decision threshold " +

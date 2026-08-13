@@ -22,10 +22,11 @@ instead of plain accuracy.
 {"status":"healthy","model_loaded":true,"model_path":"/srv/app/models/model.pkl","version":"2.0.0"}
 ```
 
-The current deployment was released by the CI/CD pipeline from commit
-`363892b`, with all three jobs green (lint and test, build and smoke-test the
-image, deploy to Render). Render reports the service as **Live**, triggered by
-the deploy hook.
+The current deployment was released automatically by the latest successful
+GitHub Actions CI/CD run on `main`, with all three jobs green (lint and test,
+build and smoke-test the image, deploy to Render). Render reports the service as
+**Live**, triggered by the deploy hook. The Actions tab shows which commit is
+currently deployed.
 
 > The service runs on Render's free plan, which sleeps when idle. The first
 > request after a quiet period can take 30-60 seconds while the container wakes
@@ -453,19 +454,28 @@ to `main`, every pull request against `main`, and on manual dispatch.
 Pull requests run linting, the tests and the container smoke test, but never
 deploy.
 
-The pipeline has run green end to end on commit `363892b`: **Lint and test**,
-**Build and smoke-test the image**, and **Deploy to Render** all passed, and
-Render recorded the resulting deployment as Live with the deploy hook as its
-trigger.
+The pipeline runs green end to end on `main`: **Lint and test**, **Build and
+smoke-test the image**, and **Deploy to Render** all pass, and Render records the
+resulting deployment as Live with the deploy hook as its trigger. The latest
+successful run, and the commit it released, are on the repository's Actions tab —
+we deliberately do not pin a commit hash here, because writing one down freezes
+it at the moment the documentation itself is committed.
 
 ---
 
 ## 13. Monitoring — EvidentlyAI drift detection
 
-We use **EvidentlyAI 0.7.21** with `DataDriftPreset` over the 30 input
+We use **EvidentlyAI 0.7.21** with `DataDriftPreset` over the 30 numeric input
 features. `Class` is excluded: the API never receives a label at prediction
 time, so monitoring the target would say nothing about what production is
 actually sending.
+
+Evidently chooses the drift test per column from the data rather than us
+naming one. In the reports committed here it selected **normalized Wasserstein
+distance** for all 30 columns, with a drift threshold of **0.1** — a column
+counts as drifted when its distance exceeds that. The method, score and
+threshold Evidently used are written into each JSON summary, so the summary and
+the HTML report always agree.
 
 ### Building the batches
 
@@ -666,10 +676,10 @@ stages.
 | Model deployed as a FastAPI endpoint | Done | [`app/`](app/), `/docs` on the live service |
 | Containerised with Docker | Done | [`Dockerfile`](Dockerfile), built and smoke-tested in CI |
 | Deployed to the cloud | Done | Render — https://mai201-fraud-api.onrender.com, `/health` returns 200 |
-| CI/CD pipeline with GitHub Actions | Done | [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml) — green on `363892b` |
+| CI/CD pipeline with GitHub Actions | Done | [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml) — all jobs green on `main` |
 | CI runs tests | Done | `pytest -v`, 34 tests |
 | CI runs linting | Done | `ruff check .` |
-| CI auto-deploys | Done | `deploy` job fired the Render hook on `363892b`; deployment Live |
+| CI auto-deploys | Done | `deploy` job fires the Render hook on `main`; latest deployment Live |
 | Monitoring implemented | Done | [`monitoring/drift.py`](monitoring/drift.py) |
 | Drift detection with EvidentlyAI | Done | Evidently 0.7.21, `DataDriftPreset` |
 | Retraining implemented | Done | [`monitoring/retraining.py`](monitoring/retraining.py) |

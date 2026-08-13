@@ -7,9 +7,9 @@ Driver: **Someyah** (Documentation Lead). Abdulraouf answers model questions,
 Mohamed answers deployment questions.
 
 The service is deployed and responding at
-**https://mai201-fraud-api.onrender.com**, released by the CI/CD pipeline from
-commit `363892b` with all three jobs green. Everything below is a live call -
-there are no screenshots standing in for anything.
+**https://mai201-fraud-api.onrender.com**, released automatically by the latest
+successful GitHub Actions CI/CD run with all three jobs green. Everything below
+is a live call - there are no screenshots standing in for anything.
 
 ---
 
@@ -109,9 +109,11 @@ Switch to tab 3.
 > call the Render deploy hook - which is what released the version we just
 > called."
 
-Open the run for commit **`363892b`** so the three green jobs are visible:
-**Lint and test**, **Build and smoke-test the image**, **Deploy to Render**.
-Do not click into individual step logs - there is not time.
+Open the **latest successful run on `main`** so the three green jobs are
+visible: **Lint and test**, **Build and smoke-test the image**, **Deploy to
+Render**. The page shows the commit it released, so read it off the screen rather
+than quoting a number from the slides. Do not click into individual step logs -
+there is not time.
 
 If anyone asks how the deploy is authenticated: the Render deploy hook is
 stored as a GitHub Actions secret and is never printed by the workflow. Do not

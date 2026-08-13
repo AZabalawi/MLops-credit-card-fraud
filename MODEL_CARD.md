@@ -196,8 +196,11 @@ not equal and are not interchangeable, and a single F1 score hides that.
 ## 7. Monitoring and retraining
 
 **Drift detection** uses EvidentlyAI 0.7.21 (`DataDriftPreset`) over the 30
-input features. `Class` is excluded, because the API never receives a label at
-prediction time. The reference is a seeded 10,000-row sample of the training
+numeric input features. `Class` is excluded, because the API never receives a
+label at prediction time. Evidently selects the drift test per column from the
+data; in the generated reports it chose **normalized Wasserstein distance** with
+a threshold of 0.1, and that method name is recorded in each JSON summary
+alongside every score. The reference is a seeded 10,000-row sample of the training
 split, held fixed. Two scenarios are generated and committed:
 
 | Scenario | Report | Drifted columns | Dataset drift |
@@ -251,8 +254,9 @@ The service is live at **https://mai201-fraud-api.onrender.com** (Swagger UI at
 {"status":"healthy","model_loaded":true,"model_path":"/srv/app/models/model.pkl","version":"2.0.0"}
 ```
 
-The deployment was released by the CI/CD pipeline from commit `363892b` after
-linting, the test suite and the container smoke test all passed. A request to
+The running version was released automatically by the latest successful GitHub
+Actions CI/CD run on `main`, after linting, the test suite and the container
+smoke test all passed. A request to
 the deployed `/predict` with the legitimate sample transaction returns
 `predicted_class 0` and `fraud_probability 0.000235`, the same value the
 artifact produces locally — the container ships the identical `model.pkl`, and

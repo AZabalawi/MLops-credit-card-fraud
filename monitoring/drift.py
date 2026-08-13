@@ -9,14 +9,22 @@ deliberately excluded: the API never receives a label at prediction time, so
 monitoring the label would tell us nothing about what production actually
 sends us.
 
-Evidently picks the statistical test per column from the sample size; for
-numerical columns at these volumes that is the Kolmogorov-Smirnov test with a
-p-value threshold of 0.05. A column counts as drifted when its test fails, and
-the dataset as a whole counts as drifted when the share of drifted columns
-exceeds ``--drift-share`` (0.5 by default).
+Evidently chooses the drift test per column from the data itself, so the
+method is an output of the run rather than something we pick. In the reports
+committed here each batch has several thousand rows, and Evidently selected the
+**normalized Wasserstein distance** for all 30 numeric columns with a drift
+threshold of 0.1. A column counts as drifted when its distance exceeds that
+threshold, and the dataset as a whole counts as drifted when the share of
+drifted columns exceeds ``--drift-share`` (0.5 by default).
 
-Every number written to the JSON summary comes from the Evidently snapshot -
-nothing here is hand-written.
+Note that the two families of test read in opposite directions: a p-value test
+fails when the score drops below its threshold, a distance test when the score
+rises above it. ``_column_drift_from_snapshot`` handles both, so this code stays
+correct if Evidently picks a different test on a smaller batch.
+
+Every number written to the JSON summary - including the method name and the
+threshold Evidently used - comes from the snapshot, so the summary and the HTML
+report can never disagree.
 
 Usage
     # healthy batch, expect no dataset drift
