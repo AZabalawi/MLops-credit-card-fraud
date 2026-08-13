@@ -21,7 +21,7 @@ Do all of this **before** the presentation begins, not during it:
 
    | Tab | URL |
    |---|---|
-   | 1 | https://mai201-fraud-api.onrender.com/docs |
+   | 1 | https://mai201-fraud-api.onrender.com/  (browser demo) |
    | 2 | https://mai201-fraud-api.onrender.com/health |
    | 3 | https://github.com/AZabalawi/MLops-credit-card-fraud/actions |
    | 4 | `monitoring/reports/drift_report.html` (opened from the local repo) |
@@ -41,16 +41,17 @@ Do all of this **before** the presentation begins, not during it:
 
 ## The demo, step by step
 
-### 1. Swagger UI  (~20 seconds)
+### 1. The browser demo  (~20 seconds)
 
 Switch to tab 1.
 
-> "This is the public API, running on Render. The docs page is generated
-> straight from the Pydantic schema, so it always matches what the service
-> actually accepts."
+> "This is the public service, running on Render. The page you are looking at is
+> served by the API itself, and every prediction it shows comes from a real call
+> to /predict - nothing is computed in the browser."
 
-Scroll once so the four routes are visible: `/`, `/health`, `/model-info`,
-`/predict`.
+Point out the status strip at the top: it reads API online / model loaded /
+version, and those values come from a live call to `/health`. Swagger is still
+at `/docs` if anyone wants to see the raw schema.
 
 ### 2. Health  (~15 seconds)
 
@@ -71,8 +72,8 @@ it shows the answer is coming from the deployed image, not from a laptop.
 
 ### 3. A real prediction  (~40 seconds)
 
-Back to tab 1. Expand **POST /predict** → **Try it out**. Replace the request
-body with the contents of `presentation/sample_requests/fraud.json` → **Execute**.
+Back to tab 1. Select **Load fraud example**, then **Analyze transaction**. The
+inference stages tick across while the request runs, and the result card fills in.
 
 > "This is a real fraudulent transaction from our own held-out test split -
 > all 30 features, no label. The model gives it a fraud probability of 0.9696."
@@ -90,7 +91,7 @@ Expected response:
 }
 ```
 
-Then paste `legitimate.json` and execute again - it comes back with
+Then select **Load legitimate example** and analyze again - it comes back with
 `fraud_probability` 0.000235 and label `legitimate`. The contrast lands well,
 and this is the exact call we confirmed against the deployed service, so it is
 the safer one to lead with if you only have time for a single request.
@@ -103,7 +104,7 @@ figures written into a slide.
 
 Switch to tab 3.
 
-> "Every push runs this workflow. Ruff lints the repository, pytest runs 34
+> "Every push runs this workflow. Ruff lints the repository, pytest runs 37
 > tests against the real model, then Docker builds the image and CI starts the
 > container and probes it. Only after all of that passes does the deploy job
 > call the Render deploy hook - which is what released the version we just
@@ -170,7 +171,7 @@ or WSL.
 |---|---|
 | The service is cold and the first call hangs | Say so - "free plan, the container is waking up" - and keep talking through the CI/CD tab. Come back to it. |
 | Render is down or the URL will not load | Run the service locally: `uvicorn app.main:app --port 8000`, then use `http://localhost:8000/docs`. Say clearly that you are showing the local container because the cloud service is unreachable. |
-| Swagger rejects the pasted body | You almost certainly missed a bracket. Use the curl backup instead. |
+| The demo page will not load | Fall back to Swagger at `/docs`, or use the curl commands below. |
 | The drift report will not open | Show `monitoring/reports/drift_summary.json` instead - the headline numbers are in the first few lines. |
 
 Never present a screenshot as a live call. If the live service is unavailable,

@@ -4,11 +4,17 @@ main.py
 FastAPI application exposing the Phase 1 fraud detection model.
 
 Endpoints
-    GET  /            service description
+    GET  /            browser demo page (static/index.html)
+    GET  /api         service description as JSON
     GET  /health      service status + whether the model is really loaded
     GET  /model-info  metadata about the served pipeline
     POST /predict     score one transaction
     GET  /docs        interactive Swagger UI (provided by FastAPI)
+
+The demo page is plain HTML, CSS and JavaScript served from app/static. It
+calls this same API over relative URLs, so it works identically on localhost
+and on the deployed service. It computes nothing itself: every number it shows
+comes from a POST to /predict.
 
 The model is loaded once during application startup via the lifespan hook.
 If loading fails the app still starts, but /health answers 503 and /predict
@@ -20,9 +26,11 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app import __version__
 from app.model_service import ModelNotLoadedError, model_service
@@ -40,6 +48,9 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger("fraud-api")
+
+STATIC_DIR = Path(__file__).parent / "static"
+INDEX_FILE = STATIC_DIR / "index.html"
 
 
 @asynccontextmanager
@@ -72,10 +83,14 @@ app = FastAPI(
     contact={"name": "MAI201 Group - Abdulraouf Zabalawi, Mohamed Roble, Someyah Balashi"},
 )
 
+if STATIC_DIR.is_dir():
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+else:  # pragma: no cover - only if the package is deployed without its assets
+    logger.warning("Static directory %s is missing; / will serve JSON instead.", STATIC_DIR)
 
-@app.get("/", response_model=RootResponse, tags=["service"])
-def root() -> RootResponse:
-    """Basic information about the API."""
+
+def _service_info() -> RootResponse:
+    """The JSON description of this service."""
     return RootResponse(
         service="Credit Card Fraud Detection API",
         version=__version__,
@@ -87,6 +102,20 @@ def root() -> RootResponse:
         health_url="/health",
         predict_url="/predict",
     )
+
+
+@app.get("/", include_in_schema=False)
+def demo_page():
+    """Serve the browser demo. Falls back to JSON if the assets are absent."""
+    if INDEX_FILE.is_file():
+        return FileResponse(INDEX_FILE, media_type="text/html")
+    return JSONResponse(content=_service_info().model_dump())
+
+
+@app.get("/api", response_model=RootResponse, tags=["service"])
+def api_root() -> RootResponse:
+    """Basic information about the API."""
+    return _service_info()
 
 
 @app.get(

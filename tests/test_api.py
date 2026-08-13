@@ -3,16 +3,64 @@
 from __future__ import annotations
 
 import copy
+import json
+from pathlib import Path
 
 from app.model_service import FEATURE_ORDER, model_service
 
+APP_JS = Path(__file__).resolve().parents[1] / "app" / "static" / "app.js"
+EXAMPLES_MARKER = "const EXAMPLES = "
 
-def test_root_returns_service_information(client):
+
+def load_demo_examples() -> dict:
+    """Pull the EXAMPLES literal out of the demo's JavaScript."""
+    source = APP_JS.read_text(encoding="utf-8")
+    start = source.find(EXAMPLES_MARKER)
+    assert start != -1, "EXAMPLES literal not found in app/static/app.js"
+    obj, _ = json.JSONDecoder().raw_decode(source, start + len(EXAMPLES_MARKER))
+    return obj
+
+
+def test_root_serves_the_demo_page(client):
+    """/ is the browser demo; the JSON description moved to /api."""
     response = client.get("/")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert "Credit Card Fraud Detection" in response.text
+    assert "/static/app.js" in response.text
+
+
+def test_api_endpoint_returns_service_information(client):
+    response = client.get("/api")
     assert response.status_code == 200
     body = response.json()
     assert body["service"] == "Credit Card Fraud Detection API"
     assert body["docs_url"] == "/docs"
+
+
+def test_static_assets_are_served(client):
+    for asset in ("/static/style.css", "/static/app.js"):
+        response = client.get(asset)
+        assert response.status_code == 200, asset
+        assert response.content
+
+
+def test_demo_examples_are_accepted_by_the_real_model(client):
+    """The buttons in the demo must load payloads the API actually accepts.
+
+    The examples are read out of app.js itself, so this fails if someone edits
+    them into something the model cannot score.
+    """
+    examples = load_demo_examples()
+    assert set(examples) == {"legitimate", "fraud"}
+
+    for name, payload in examples.items():
+        assert sorted(payload) == sorted(FEATURE_ORDER), f"{name} has the wrong fields"
+        response = client.post("/predict", json=payload)
+        assert response.status_code == 200, f"{name} was rejected: {response.text}"
+        body = response.json()
+        assert body["label"] == name
+        assert 0.0 <= body["fraud_probability"] <= 1.0
 
 
 def test_health_is_healthy_and_model_is_loaded(client):

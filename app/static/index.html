@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Credit Card Fraud Detection - Live Inference Demo</title>
+<link rel="stylesheet" href="/static/style.css" />
+<link rel="icon" href="data:," />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <div>
+      <h1>Credit Card Fraud Detection</h1>
+      <p class="subtitle">Live machine learning inference demo</p>
+    </div>
+    <div class="status-strip" id="status-strip" aria-live="polite">
+      <span class="pill pill-wait" id="pill-api">
+        <span class="dot"></span><span id="pill-api-text">Connecting to model service...</span>
+      </span>
+      <span class="pill pill-wait" id="pill-model">
+        <span class="dot"></span><span id="pill-model-text">Model status unknown</span>
+      </span>
+      <span class="pill pill-idle" id="pill-version">
+        <span id="pill-version-text">Version &mdash;</span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="grid">
+
+    <section class="card" aria-labelledby="input-title">
+      <div class="card-head">
+        <h2 id="input-title">Transaction input</h2>
+        <span class="card-note">30 features: Time, V1&ndash;V28, Amount</span>
+      </div>
+
+      <div class="field-row">
+        <label class="field">
+          <span class="field-label">Amount</span>
+          <input type="number" id="Amount" step="any" min="0" placeholder="0.00" autocomplete="off" />
+        </label>
+        <label class="field">
+          <span class="field-label">Time <span class="hint">(seconds since first transaction)</span></span>
+          <input type="number" id="Time" step="any" placeholder="0" autocomplete="off" />
+        </label>
+      </div>
+
+      <details class="advanced" id="advanced">
+        <summary>
+          <span>Advanced transaction features</span>
+          <span class="summary-note">V1&ndash;V28, anonymised PCA components</span>
+        </summary>
+        <div class="v-grid" id="v-grid"></div>
+      </details>
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-ghost" id="btn-legit">Load legitimate example</button>
+        <button type="button" class="btn btn-ghost" id="btn-fraud">Load fraud example</button>
+        <button type="button" class="btn btn-quiet" id="btn-clear">Clear</button>
+      </div>
+
+      <button type="button" class="btn btn-primary btn-block" id="btn-analyze">
+        <span id="btn-analyze-text">Analyze transaction</span>
+      </button>
+
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+
+      <p class="example-note">
+        The example values are two real transactions from the project's held-out
+        test split. Only the inputs are pre-filled &mdash; every prediction shown
+        here is returned by the deployed model.
+      </p>
+    </section>
+
+    <div class="col-stack">
+
+      <section class="card" aria-labelledby="flow-title">
+        <div class="card-head">
+          <h2 id="flow-title">Inference stages</h2>
+        </div>
+        <ol class="steps" id="steps">
+          <li class="step" data-step="1"><span class="step-mark"></span><span class="step-text">Reading transaction</span></li>
+          <li class="step" data-step="2"><span class="step-mark"></span><span class="step-text">Validating input features</span></li>
+          <li class="step" data-step="3"><span class="step-mark"></span><span class="step-text">Sending transaction to FastAPI</span></li>
+          <li class="step" data-step="4"><span class="step-mark"></span><span class="step-text">Running trained model inference</span></li>
+          <li class="step" data-step="5"><span class="step-mark"></span><span class="step-text">Calculating fraud probability</span></li>
+          <li class="step" data-step="6"><span class="step-mark"></span><span class="step-text">Comparing against decision threshold</span></li>
+          <li class="step" data-step="7"><span class="step-mark"></span><span class="step-text">Returning final prediction</span></li>
+        </ol>
+        <p class="steps-caption">
+          Stages 1&ndash;3 run in this browser. Stages 4&ndash;7 happen inside the API
+          and are marked complete when the real response arrives.
+        </p>
+      </section>
+
+      <section class="card result-card" id="result-card" aria-live="polite">
+        <div class="result-empty" id="result-empty">
+          <p>No prediction yet.</p>
+          <p class="muted-sm">Load an example, then select <strong>Analyze transaction</strong>.</p>
+        </div>
+
+        <div class="result-body" id="result-body" hidden>
+          <div class="verdict" id="verdict">
+            <span class="verdict-icon" id="verdict-icon"></span>
+            <span class="verdict-text" id="verdict-text"></span>
+          </div>
+
+          <div class="prob-block">
+            <div class="prob-head">
+              <span class="prob-label">Fraud probability</span>
+              <span class="prob-value" id="prob-value">&mdash;</span>
+            </div>
+            <div class="prob-track" id="prob-track">
+              <div class="prob-fill" id="prob-fill"></div>
+              <div class="prob-threshold" id="prob-threshold"></div>
+            </div>
+            <p class="prob-note" id="prob-note"></p>
+          </div>
+
+          <dl class="kv" id="kv">
+            <div><dt>Predicted class</dt><dd id="kv-class">&mdash;</dd></div>
+            <div><dt>Label</dt><dd id="kv-label">&mdash;</dd></div>
+            <div><dt>Fraud probability</dt><dd id="kv-prob">&mdash;</dd></div>
+            <div><dt>Decision threshold</dt><dd id="kv-threshold">&mdash;</dd></div>
+            <div><dt>is_fraud</dt><dd id="kv-isfraud">&mdash;</dd></div>
+            <div><dt>Model version</dt><dd id="kv-version">&mdash;</dd></div>
+          </dl>
+        </div>
+
+        <div class="result-error" id="result-error" hidden>
+          <div class="verdict verdict-error">
+            <span class="verdict-icon">!</span>
+            <span class="verdict-text">Prediction failed</span>
+          </div>
+          <p class="error-message" id="error-message"></p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <section class="card" aria-labelledby="pipeline-title">
+    <div class="card-head">
+      <h2 id="pipeline-title">Model pipeline</h2>
+      <span class="card-note" id="pipeline-note">Served from models/model.pkl</span>
+    </div>
+    <ol class="pipeline" id="pipeline">
+      <li><span class="pipe-box">Transaction data</span></li>
+      <li><span class="pipe-box">FastAPI validation</span></li>
+      <li><span class="pipe-box">Feature vector <em id="pipe-features">30 features</em></span></li>
+      <li><span class="pipe-box pipe-model">Trained <span id="pipe-model-name">model</span></span></li>
+      <li><span class="pipe-box">Fraud probability</span></li>
+      <li><span class="pipe-box">Decision threshold <em id="pipe-threshold"></em></span></li>
+      <li><span class="pipe-box pipe-end">Fraud / Legitimate</span></li>
+    </ol>
+  </section>
+
+  <details class="card raw" id="raw">
+    <summary>
+      <span>View API response</span>
+      <span class="summary-note">Exact JSON returned by POST /predict</span>
+    </summary>
+    <pre id="raw-json">No request has been sent yet.</pre>
+  </details>
+
+  <footer class="site-footer">
+    <span>MAI201 MLOps &middot; Phase 2</span>
+    <span class="dotsep">&middot;</span>
+    <a href="/docs">Swagger UI</a>
+    <span class="dotsep">&middot;</span>
+    <a href="/health">Health</a>
+    <span class="dotsep">&middot;</span>
+    <a href="/model-info">Model info</a>
+    <span class="dotsep">&middot;</span>
+    <span>Academic demonstration &mdash; not a financial decision system.</span>
+  </footer>
+
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
